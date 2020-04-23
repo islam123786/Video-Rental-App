@@ -24,14 +24,13 @@ class Form extends Component {
     const obj = {};
     obj[name] = value;
 
-    console.log(this.schema);
-
-    const result = Joi.validate(obj, this.schema);
+    const schema = {};
+    schema[name] = this.schema[name];
+    const result = Joi.validate(obj, schema);
 
     if (!result.error) return null;
-
     const errors = {};
-    errors[result.error.details[0].path[0]] = result.error.details[0].message;
+    errors[name] = result.error.details[0].message;
 
     return errors;
   };
@@ -46,12 +45,11 @@ class Form extends Component {
   };
 
   handleChange = ({ currentTarget: input }) => {
-    //const errors = { ...this.state.errors };
     const errors = this.validateProperty(input);
-    //if (errorMessage) errors[input.name] = errorMessage;
 
     const data = { ...this.state.data };
     data[input.name] = input.value;
+
     this.setState({ data, errors: errors || {} });
   };
 
