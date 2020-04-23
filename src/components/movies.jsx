@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { getMovies } from "../fakeMovieService";
-import { getGenres } from "../fakeGenreService";
+import { getMovies, deleteMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 import Pagination from "./common/pagination";
 import { paginate } from "../utils/paginate";
 import ListGroup from "./common/listgroup";
@@ -8,10 +8,11 @@ import MoviesTable from "./moviesTable";
 import { Link } from "react-router-dom";
 import _ from "lodash";
 import SearchBox from "./common/searchBox";
+import { toast } from "react-toastify";
 
 class Movies extends Component {
   state = {
-    movies: getMovies(),
+    movies: [],
     genres: [],
     pageSize: 4,
     currentPage: 1,
@@ -20,13 +21,25 @@ class Movies extends Component {
     searchQuery: "",
   };
 
-  componentDidMount() {
-    this.setState({ movies: getMovies(), genres: getGenres() });
+  async componentDidMount() {
+    const { data: genres } = await getGenres();
+    const { data: movies } = await getMovies();
+
+    this.setState({ movies, genres });
   }
 
-  handleDelete = (movie) => {
+  handleDelete = async (movie) => {
+    const originalMovies = this.state.movies;
     const movies = this.state.movies.filter((m) => m._id !== movie._id);
     this.setState({ movies });
+    try {
+      deleteMovie(movie._id);
+    } catch (ex) {
+      if (ex.response && ex.response.status === "404")
+        toast.error("Movie Not Found");
+
+      this.setState({ originalMovies });
+    }
   };
 
   handleLikeClick = (movie) => {
@@ -40,10 +53,10 @@ class Movies extends Component {
     this.setState({ currentPage: page });
   };
 
-  handleGenreSelected = (genre) => {
+  handleGenreSelected = async (genre) => {
     this.setState({ selectedGenre: genre, currentPage: 1, searchQuery: "" });
 
-    let allMovies = getMovies();
+    let { data: allMovies } = await getMovies();
     if (genre) {
       const movies = allMovies.filter((m) => m.genre._id === genre._id);
       this.setState({ movies });
@@ -62,12 +75,12 @@ class Movies extends Component {
     this.props.history.push("/movies/new");
   };
 
-  handleSearch = (query) => {
+  handleSearch = async (query) => {
     const searchQuery = query;
     this.setState({ searchQuery, selectedGenre: null, currentPage: 1 });
 
     if (searchQuery) {
-      let allMovies = getMovies();
+      let { data: allMovies } = getMovies();
       const movies = allMovies.filter((m) =>
         m.title.toLowerCase().startsWith(searchQuery.toLowerCase())
       );
