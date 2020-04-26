@@ -1,6 +1,9 @@
 import React from "react";
 import Form from "./common/form";
 import Joi from "joi-browser";
+import auth from "../services/authService";
+import { register } from "../services/userService";
+import { toast } from "react-toastify";
 
 class RegisterForm extends Form {
   state = {
@@ -18,8 +21,21 @@ class RegisterForm extends Form {
     name: Joi.string().required().label("Name"),
   };
 
-  doSubmit = () => {
-    console.log("Registered");
+  doSubmit = async () => {
+    try {
+      const { data } = this.state;
+      const response = await register({
+        email: data.username,
+        password: data.password,
+        name: data.name,
+      });
+      auth.loginWithJwt(response.headers["x-auth-token"]);
+      window.location = "/";
+    } catch (ex) {
+      if (ex.response && ex.response.status === 400) {
+        toast.error(ex.response.data);
+      }
+    }
   };
 
   render() {

@@ -1,16 +1,9 @@
-import React from "react";
-import { NavLink, Route, Redirect, Switch } from "react-router-dom";
-import Movies from "./movies";
-import Customers from "./customers";
-import Rentals from "./rentals";
-import NotFound from "./notFound";
-import LoginForm from "./loginForm";
-import RegisterForm from "./registerForm";
-import MoviesForm from "./moviesForm";
+import React, { Component } from "react";
+import { NavLink } from "react-router-dom";
 
-const NavBar = () => {
-  return (
-    <div>
+class NavBar extends Component {
+  render() {
+    return (
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <span className="navbar-brand">Vidly</span>
         <div className="collapse navbar-collapse" id="navbarNav">
@@ -30,35 +23,39 @@ const NavBar = () => {
                 Rentals
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/login">
-                Login
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink className="nav-link" to="/register">
-                Register
-              </NavLink>
-            </li>
+            {!this.props.user && (
+              <React.Fragment>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/login">
+                    Login
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/register">
+                    Register
+                  </NavLink>
+                </li>
+              </React.Fragment>
+            )}
+            {this.props.user && (
+              <React.Fragment>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/profile">
+                    {this.props.user.name}
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/logout">
+                    logout
+                  </NavLink>
+                </li>
+              </React.Fragment>
+            )}
           </ul>
         </div>
       </nav>
-      <br />
-      <main className="container">
-        <Switch>
-          <Route path="/register" component={RegisterForm} />
-          <Route path="/login" component={LoginForm} />
-          <Route path="/movies/:id" component={MoviesForm} />
-          <Route path="/movies" component={Movies} />
-          <Route path="/customers" component={Customers} />
-          <Route path="/rentals" component={Rentals} />
-          <Route path="/not-found" component={NotFound} />
-          <Redirect from="/" exact to="/movies" />
-          <Redirect to="/not-found" />
-        </Switch>
-      </main>
-    </div>
-  );
-};
+    );
+  }
+}
 
 export default NavBar;

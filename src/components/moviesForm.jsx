@@ -38,14 +38,15 @@ class MoviesForm extends Form {
     return data;
   };
 
-  componentDidMount = async () => {
+  populateGenres = async () => {
     const { data: genres } = await getGenres();
     this.setState({ genres });
+  };
 
-    const movieId = this.props.match.params.id;
-    if (movieId === "new") return;
-
+  populateMovies = async () => {
     try {
+      const movieId = this.props.match.params.id;
+      if (movieId === "new") return;
       const { data: movie } = await getMovie(movieId);
       this.setState({ data: this.mapMovietoData(movie) });
     } catch (ex) {
@@ -54,8 +55,13 @@ class MoviesForm extends Form {
     }
   };
 
-  doSubmit() {
-    saveMovie(this.state.data);
+  componentDidMount = () => {
+    this.populateGenres();
+    this.populateMovies();
+  };
+
+  async doSubmit() {
+    await saveMovie(this.state.data);
     this.props.history.push("/movies");
   }
 

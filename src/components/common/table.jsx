@@ -9,6 +9,7 @@ const Table = ({
   columns,
   onDelete,
   onLikeClicked,
+  user,
 }) => {
   return (
     <table className="table">
